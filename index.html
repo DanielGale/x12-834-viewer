@@ -2,35 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>X12 834 Tree Viewer</title>
+  <title>X12 834 Grouped Tree Viewer</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     textarea { width: 100%; height: 150px; font-family: monospace; }
     button { margin-top: 10px; }
-    .segment { margin: 4px 0; padding: 8px; border-radius: 6px; }
-    .INS { background-color: #d0f0fd; }
-    .REF { background-color: #e0ffe0; }
-    .NM1 { background-color: #fff3cd; }
-    .PER { background-color: #fce4ec; }
-    .DTP { background-color: #f0e68c; }
-    .N3, .N4 { background-color: #e8eaf6; }
-    .HD  { background-color: #ffebee; }
-    .default { background-color: #f9f9f9; }
-
     details summary {
       cursor: pointer;
       font-weight: bold;
       padding: 4px;
     }
+    .segment, details { margin: 4px 0; padding-left: 10px; }
+    .element { margin-left: 16px; font-family: monospace; }
 
-    .element {
-      margin-left: 16px;
-      font-family: monospace;
-    }
+    /* Color Coding */
+    .ISA, .IEA { background-color: #f0f0f0; }
+    .GS, .GE { background-color: #e0f7fa; }
+    .ST, .SE { background-color: #ede7f6; }
+    .INS     { background-color: #d0f0fd; }
+    .REF     { background-color: #e0ffe0; }
+    .NM1     { background-color: #fff3cd; }
+    .PER     { background-color: #fce4ec; }
+    .DTP     { background-color: #f0e68c; }
+    .N3, .N4 { background-color: #e8eaf6; }
+    .HD      { background-color: #ffebee; }
+    .default { background-color: #f9f9f9; }
   </style>
 </head>
 <body>
-  <h2>X12 834 Tree Viewer</h2>
+  <h2>X12 834 Grouped Tree Viewer</h2>
   <p>Paste your 834 file contents below:</p>
   <textarea id="x12input"></textarea><br>
   <button onclick="parseX12()">Parse File</button>
@@ -39,33 +39,52 @@
   <script>
     function parseX12() {
       const raw = document.getElementById("x12input").value.trim();
-      const segmentDelimiter = "~";
-      const elementDelimiter = "*";
-      const segments = raw.split(segmentDelimiter).filter(Boolean);
+      const segments = raw.split("~").filter(Boolean);
       const output = document.getElementById("output");
       output.innerHTML = "";
 
+      const stack = [];
+      let container = output;
+
       segments.forEach(segment => {
-        const elements = segment.trim().split(elementDelimiter);
+        const elements = segment.trim().split("*");
         const segmentId = elements[0];
         const colorClass = [
-          "INS", "REF", "NM1", "PER", "DTP", "N3", "N4", "HD"
+          "ISA", "IEA", "GS", "GE", "ST", "SE", "INS", "REF", "NM1",
+          "PER", "DTP", "N3", "N4", "HD"
         ].includes(segmentId) ? segmentId : "default";
 
-        const wrapper = document.createElement("details");
-        wrapper.className = `segment ${colorClass}`;
-        const summary = document.createElement("summary");
-        summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
-        wrapper.appendChild(summary);
+        // Closing tags
+        if (segmentId === "GE" || segmentId === "SE" || segmentId === "IEA") {
+          const group = stack.pop();
+          container = stack.length > 0 ? stack[stack.length - 1] : output;
+        }
 
-        elements.slice(1).forEach((e, i) => {
-          const div = document.createElement("div");
-          div.className = "element";
-          div.textContent = `Element ${i + 1}: ${e}`;
-          wrapper.appendChild(div);
-        });
-
-        output.appendChild(wrapper);
+        // Start a new group
+        if (["ISA", "GS", "ST", "INS"].includes(segmentId)) {
+          const wrapper = document.createElement("details");
+          wrapper.className = `segment ${colorClass}`;
+          const summary = document.createElement("summary");
+          summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
+          wrapper.appendChild(summary);
+          container.appendChild(wrapper);
+          stack.push(wrapper);
+          container = wrapper;
+        } else {
+          // Add to current container
+          const seg = document.createElement("details");
+          seg.className = `segment ${colorClass}`;
+          const summary = document.createElement("summary");
+          summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
+          seg.appendChild(summary);
+          elements.slice(1).forEach((e, i) => {
+            const div = document.createElement("div");
+            div.className = "element";
+            div.textContent = `Element ${i + 1}: ${e}`;
+            seg.appendChild(div);
+          });
+          container.appendChild(seg);
+        }
       });
     }
   </script>
