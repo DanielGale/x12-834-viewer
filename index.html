@@ -44,9 +44,10 @@
   <div id="output"></div>
 
   <script>
-    function parseX12(input) {
+     function parseX12() {
+      const input = document.getElementById("x12input").value;
       const rawSegments = input.split(/~\s*/).filter(Boolean);
-      const viewer = document.getElementById("viewer");
+      const viewer = document.getElementById("output"); // fixed: viewer → output
       viewer.innerHTML = ""; // Clear old view
       const stack = [];
       let container = viewer;
@@ -56,10 +57,6 @@
         const segmentId = elements[0].trim();
         const colorClass = getSegmentClass(segmentId);
     
-        const elementGroup = document.createElement("div");
-        elementGroup.className = `segment ${colorClass}`;
-    
-        // Handle group-openers like ISA, GS, ST, INS
         if (["ISA", "GS", "ST", "INS"].includes(segmentId)) {
           const wrapper = document.createElement("details");
           wrapper.className = `segment ${colorClass}`;
@@ -69,7 +66,6 @@
           summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
           wrapper.appendChild(summary);
     
-          // Render individual elements under the summary
           elements.slice(1).forEach((el, i) => {
             const e = document.createElement("div");
             e.className = "element";
@@ -80,17 +76,13 @@
           container.appendChild(wrapper);
           stack.push(container);
           container = wrapper;
-        }
-        // Handle group-closers like IEA, GE, SE
-        else if (["IEA", "GE", "SE"].includes(segmentId)) {
+        } else if (["IEA", "GE", "SE"].includes(segmentId)) {
           const e = document.createElement("div");
           e.className = `segment ${colorClass}`;
           e.textContent = segment;
           container.appendChild(e);
-          container = stack.pop(); // move back up a level
-        }
-        // Normal non-group segments
-        else {
+          container = stack.pop();
+        } else {
           const segDiv = document.createElement("div");
           segDiv.className = `segment ${colorClass}`;
           segDiv.innerHTML = `<strong>${segmentId}</strong>`;
@@ -103,6 +95,20 @@
           container.appendChild(segDiv);
         }
       });
+    }
+    
+    // Color mapping function — include this just before or after parseX12()
+    function getSegmentClass(segmentId) {
+      const map = {
+        ISA: "ISA", IEA: "IEA",
+        GS: "GS", GE: "GE",
+        ST: "ST", SE: "SE",
+        INS: "INS", REF: "REF",
+        NM1: "NM1", PER: "PER",
+        DTP: "DTP", N3: "N3", N4: "N4",
+        HD: "HD"
+      };
+      return map[segmentId] || "default";
     }
   </script>
 </body>
