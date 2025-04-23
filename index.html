@@ -4,29 +4,36 @@
   <meta charset="UTF-8" />
   <title>X12 834 Grouped Tree Viewer</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
     textarea { width: 100%; height: 150px; font-family: monospace; }
-    button { margin-top: 10px; }
+    button { margin-top: 10px; padding: 8px 16px; }
+  
     details summary {
       cursor: pointer;
       font-weight: bold;
       padding: 4px;
+      color: white;
     }
-    .segment, details { margin: 4px 0; padding-left: 10px; }
-    .element { margin-left: 16px; font-family: monospace; }
-
-    /* Color Coding */
-    .ISA, .IEA { background-color: #f0f0f0; }
-    .GS, .GE { background-color: #e0f7fa; }
-    .ST, .SE { background-color: #ede7f6; }
-    .INS     { background-color: #d0f0fd; }
-    .REF     { background-color: #e0ffe0; }
-    .NM1     { background-color: #fff3cd; }
-    .PER     { background-color: #fce4ec; }
-    .DTP     { background-color: #f0e68c; }
-    .N3, .N4 { background-color: #e8eaf6; }
-    .HD      { background-color: #ffebee; }
-    .default { background-color: #f9f9f9; }
+  
+    .segment, details { margin: 4px 0; border-radius: 6px; padding-left: 10px; }
+  
+    .ISA, .IEA { background-color: #dcdcdc; color: #000; }
+    .GS, .GE   { background-color: #00acc1; color: #fff; }
+    .ST, .SE   { background-color: #673ab7; color: #fff; }
+    .INS       { background-color: #0288d1; color: #fff; }
+    .REF       { background-color: #388e3c; color: #fff; }
+    .NM1       { background-color: #fbc02d; color: #000; }
+    .PER       { background-color: #d81b60; color: #fff; }
+    .DTP       { background-color: #f9a825; color: #000; }
+    .N3, .N4   { background-color: #3f51b5; color: #fff; }
+    .HD        { background-color: #c62828; color: #fff; }
+    .default   { background-color: #eeeeee; color: #000; }
+  
+    .element {
+      margin-left: 16px;
+      font-family: monospace;
+      padding: 2px 0;
+    }
   </style>
 </head>
 <body>
