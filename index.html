@@ -71,9 +71,20 @@
         if (["ISA", "GS", "ST", "INS"].includes(segmentId)) {
           const wrapper = document.createElement("details");
           wrapper.className = `segment ${colorClass}`;
+          wrapper.open = true; // optionally default open for visibility
+        
           const summary = document.createElement("summary");
           summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
           wrapper.appendChild(summary);
+        
+          // show elements inside group header too
+          elements.slice(1).forEach((e, i) => {
+            const div = document.createElement("div");
+            div.className = "element";
+            div.textContent = `Element ${i + 1}: ${e}`;
+            wrapper.appendChild(div);
+          });
+        
           container.appendChild(wrapper);
           stack.push(wrapper);
           container = wrapper;
