@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>X12 834 Viewer</title>
+  <title>X12 834 Tree Viewer</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
-    textarea { width: 100%; height: 150px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
-    th { background-color: #f0f0f0; }
-
-    /* Color coding by segment ID */
+    textarea { width: 100%; height: 150px; font-family: monospace; }
+    button { margin-top: 10px; }
+    .segment { margin: 4px 0; padding: 8px; border-radius: 6px; }
     .INS { background-color: #d0f0fd; }
     .REF { background-color: #e0ffe0; }
     .NM1 { background-color: #fff3cd; }
@@ -18,13 +15,22 @@
     .DTP { background-color: #f0e68c; }
     .N3, .N4 { background-color: #e8eaf6; }
     .HD  { background-color: #ffebee; }
-    .SE, .ST, .BGN, .LS, .LE { background-color: #e0e0e0; }
+    .default { background-color: #f9f9f9; }
 
-    .default { background-color: #ffffff; }
+    details summary {
+      cursor: pointer;
+      font-weight: bold;
+      padding: 4px;
+    }
+
+    .element {
+      margin-left: 16px;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
-  <h2>X12 834 File Viewer</h2>
+  <h2>X12 834 Tree Viewer</h2>
   <p>Paste your 834 file contents below:</p>
   <textarea id="x12input"></textarea><br>
   <button onclick="parseX12()">Parse File</button>
@@ -35,35 +41,32 @@
       const raw = document.getElementById("x12input").value.trim();
       const segmentDelimiter = "~";
       const elementDelimiter = "*";
-
       const segments = raw.split(segmentDelimiter).filter(Boolean);
-      const table = document.createElement("table");
-
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      headerRow.innerHTML = "<th>Segment</th><th>Elements</th>";
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement("tbody");
-
-      segments.forEach(segment => {
-        const elements = segment.split(elementDelimiter);
-        const segmentId = elements[0];
-        const elementData = elements.slice(1).map(e => `<div>${e}</div>`).join("");
-
-        const row = document.createElement("tr");
-        row.className = segmentId.match(/^[A-Z0-9]+$/) ? segmentId : "default";
-        row.innerHTML = `<td>${segmentId}</td><td>${elementData}</td>`;
-
-        tbody.appendChild(row);
-      });
-
-      table.appendChild(tbody);
-
       const output = document.getElementById("output");
       output.innerHTML = "";
-      output.appendChild(table);
+
+      segments.forEach(segment => {
+        const elements = segment.trim().split(elementDelimiter);
+        const segmentId = elements[0];
+        const colorClass = [
+          "INS", "REF", "NM1", "PER", "DTP", "N3", "N4", "HD"
+        ].includes(segmentId) ? segmentId : "default";
+
+        const wrapper = document.createElement("details");
+        wrapper.className = `segment ${colorClass}`;
+        const summary = document.createElement("summary");
+        summary.textContent = `${segmentId} (${elements.length - 1} elements)`;
+        wrapper.appendChild(summary);
+
+        elements.slice(1).forEach((e, i) => {
+          const div = document.createElement("div");
+          div.className = "element";
+          div.textContent = `Element ${i + 1}: ${e}`;
+          wrapper.appendChild(div);
+        });
+
+        output.appendChild(wrapper);
+      });
     }
   </script>
 </body>
